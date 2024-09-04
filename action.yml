@@ -14,11 +14,16 @@ runs:
 
   steps:
     - uses: actions/checkout@v4
-    - uses: cachix/install-nix-action@v21
+    - uses: cachix/install-nix-action@v27
     - uses: DeterminateSystems/magic-nix-cache-action@main
+    - uses: cachix/cachix-action@v14
+      with:
+        name: fantail
+        skipPush: true
+        useDaemon: false
     - name: Run `nix build`
       shell: bash
-      run: nix build ${{ github.event.inputs.nix-flake-ref }}
+      run: nix build ${{ inputs.nix-flake-ref }}
     - name: Upload build artifact
       id: upload-artifact
       uses: actions/upload-pages-artifact@v3
