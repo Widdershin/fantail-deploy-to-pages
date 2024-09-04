@@ -5,40 +5,20 @@ inputs:
     description: "The nix flake reference to build"
     default: ".#fantailProject"
 
-jobs:
-  build:
-    permissions:
-      id-token: "write"
-      contents: "read"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v21
-      - uses: DeterminateSystems/magic-nix-cache-action@main
-      - uses: cachix/cachix-action@v14
-        with:
-          name: fantail
-          skipPush: true
-      - name: Run `nix build`
-        run: nix build ${{ github.event.inputs.nix-flake-ref }}
-      - name: Upload build artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./result
+runs:
+  using: "composite"
 
-  deploy:
-    needs: build
-
-    permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+  steps:
+    - uses: actions/checkout@v4
+    - uses: cachix/install-nix-action@v21
+    - uses: DeterminateSystems/magic-nix-cache-action@main
+    - name: Run `nix build`
+      shell: bash
+      run: nix build ${{ github.event.inputs.nix-flake-ref }}
+    - name: Upload build artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./result
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
