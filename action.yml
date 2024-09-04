@@ -4,6 +4,10 @@ inputs:
   nix-flake-ref:
     description: "The nix flake reference to build"
     default: ".#fantailProject"
+outputs:
+  page_url:
+    description: "The URL of the deployed Github Pages site"
+    value: ${{ steps.deployment.outputs.page_url }}
 
 runs:
   using: "composite"
@@ -16,9 +20,12 @@ runs:
       shell: bash
       run: nix build ${{ github.event.inputs.nix-flake-ref }}
     - name: Upload build artifact
+      id: upload-artifact
       uses: actions/upload-pages-artifact@v3
       with:
         path: ./result
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
+      env:
+        name: github-pages
